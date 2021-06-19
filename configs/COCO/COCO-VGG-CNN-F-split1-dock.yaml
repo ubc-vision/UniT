@@ -1,0 +1,75 @@
+_BASE_: "../Base-RCNN-C4.yaml"
+MODEL:
+  WEIGHTS: ""
+  PIXEL_MEAN: (102.716995, 115.77262, 123.50935) #BGR
+  PIXEL_STD: (1.0, 1.0, 1.0)  #BGR
+  WEIGHTS: ""
+  META_ARCHITECTURE: "WeaklySupervisedRCNNNoMeta"
+  MASK_ON: False
+  LOAD_PROPOSALS: True
+  BACKBONE: 
+    NAME: 'VGG_CNN_F'
+    FREEZE_CONVS: 0
+  RESNETS:
+    DEPTH: 50
+  ROI_HEADS:
+    NAME: "WSROIHeadNoMeta"
+    MULTI_BOX_HEAD: False
+    NUM_CLASSES: 80
+    EMBEDDING_PATH: "/h/skhandel/FewshotDetection/WSASOD/data/embeddings/glove_mean"
+    IN_FEATURES: ['vgg_conv']
+    VISUAL_ATTENTION_HEAD:
+      IN_FEATURES: ['vgg_conv']
+      POOLER_RESOLUTION: 6
+    FAST_RCNN:
+      NAME: "SupervisedDetectorOutputsBase"
+      WEAK_DETECTOR:
+        DETECTOR_TEMP: 2.0
+        REGRESSION_BRANCH: False
+  RPN:
+    IN_FEATURES: ['vgg_conv']
+  ROI_BOX_HEAD:
+    NAME: 'VGGCNNFBoxHead'
+    POOLER_RESOLUTION: 6  
+    POOLER_TYPE: "ROIPool"
+  PROPOSAL_GENERATOR:
+    NAME: "PrecomputedProposals"
+INPUT:
+  FORMAT: "BGR"
+  MIN_SIZE_TRAIN: (480, 576, 688, 864, 1200)
+  MAX_SIZE_TRAIN: 2000
+  MIN_SIZE_TRAIN_SAMPLING: "choice"
+  MIN_SIZE_TEST: 800
+DATASETS:
+  TRAIN: ('coco_dock_base_training_query_train',)
+  TEST: ('coco_dock_base_training_query_val',)
+  CLASSIFIER_TRAIN: ('coco_train_2014',)
+  PROPOSAL_FILES_TRAIN: ('/h/skhandel/FewshotDetection/WSASOD/data/data_utils/data/coco_proposals/train2014_coco_processed.pkl',)
+  PROPOSAL_FILES_CLASSIFIER_TRAIN: ('/h/skhandel/FewshotDetection/WSASOD/data/data_utils/data/coco_proposals/train2014_coco_processed.pkl',)
+  PRECOMPUTED_PROPOSAL_TOPK_TRAIN: 5000
+  PROPOSAL_FILES_TEST: ('/h/skhandel/FewshotDetection/WSASOD/data/data_utils/data/coco_proposals/val2014_coco_processed.pkl',)
+  PRECOMPUTED_PROPOSAL_TOPK_TEST: 5000
+  FEWSHOT:
+    TYPE: 'COCO_DOCK'
+    NUM_SHOTS: 10
+    SPLIT_ID: 1
+    BASE_CLASSES_ID: [0, 1, 2, 3, 4, 5, 6, 8, 14, 15, 16, 17, 18, 19, 39, 56, 57, 58, 60, 62]
+    NOVEL_CLASSES_ID: [7, 9, 10, 11, 12, 13, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 59, 61, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79]
+DATALOADER:
+  NUM_WORKERS: 1
+SOLVER:
+  BASE_LR: 1e-4
+  REFINEMENT_LR_FACTOR: 10.0
+  MOMENTUM: 0.9
+  LR_SCHEDULER_NAME: "WarmupMultiStepLR"
+  STEPS: (210000, 250000)
+  MAX_ITER: 270000  # 17.4 epochs
+  IMS_PER_BATCH: 8
+  CHECKPOINT_PERIOD: 500
+TEST:
+  EVAL_PERIOD: 20000
+  AUG:
+    ENABLED: False
+    MIN_SIZES: (480, 576, 688, 864, 1200)
+    MAX_SIZE: 2000
+    FLIP: True

@@ -1,0 +1,66 @@
+_BASE_: "../Base-RCNN-C4.yaml"
+MODEL:
+  WEIGHTS: "/scratch/hdd001/home/skhandel/FewshotDetection/WSASOD/models/1201467/best_model_final_weights.pth"
+  META_ARCHITECTURE: "WeaklySupervisedRCNNNoMeta"
+  MASK_ON: True
+  BACKBONE: 
+    FREEZE_AT: 2
+    NAME: 'build_resnet_backbone'
+  FREEZE_LAYERS:
+    ROI_HEADS: ['box_pooler', 'weak_box_head']
+    META_ARCH: ['backbone']
+    FAST_RCNN: ['weak_detector_head', 'cls_score_delta', 'bbox_pred_delta', 'embeddings']
+    MASK_HEAD: ['deconv', 'deconv_relu', 'predictor']
+  RESNETS:
+    DEPTH: 50
+  ROI_HEADS:
+    NAME: "WSROIHeadWithMaskFineTune"
+    MULTI_BOX_HEAD: True
+    NUM_CLASSES: 80
+    EMBEDDING_PATH: "/h/skhandel/FewshotDetection/WSASOD/data/embeddings/glove_mean"
+    FAST_RCNN:
+      NAME: "SupervisedDetectorOutputsFineTune"
+      WEAK_DETECTOR:
+        DETECTOR_TEMP: 2.0
+        REGRESSION_BRANCH: False
+    FINETUNE_TERMS:
+      CLASSIFIER: ['lingual', 'visual']
+      BBOX: ['lingual', 'visual']
+      MASK: ['lingual', 'visual']
+    VISUAL_ATTENTION_HEAD:
+      VISUAL_SIMILARITY_THRESHOLD: 0.04
+  ROI_BOX_HEAD:
+    NAME: 'Res5BoxHeadWithMask'
+    POOLER_RESOLUTION: 14 
+    POOLER_TYPE: "ROIAlignV2"
+  ROI_MASK_HEAD:
+    POOLER_TYPE: "None"
+    NAME: "MaskRCNNConvUpsampleHeadWithFineTune"
+  PROPOSAL_GENERATOR:
+    NAME: "WSRPN"
+INPUT:
+  MIN_SIZE_TRAIN: (480, 512, 544, 576, 608, 640, 672, 704, 736, 768, 800)
+  MIN_SIZE_TEST: 800
+DATASETS:
+  TRAIN: ('coco_fine_tuning_query_train',)
+  TEST: ('coco_fine_tuning_query_val',)
+  CLASSIFIER_TRAIN: ('coco_train_2014',)
+  FEWSHOT:
+    TYPE: 'COCO'
+    NUM_SHOTS: 5
+    SPLIT_ID: 1
+    BASE_CLASSES_ID: [7, 9, 10, 11, 12, 13, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 59, 61, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79]
+    NOVEL_CLASSES_ID: [0, 1, 2, 3, 4, 5, 6, 8, 14, 15, 16, 17, 18, 19, 39, 56, 57, 58, 60, 62]
+DATALOADER:
+  NUM_WORKERS: 2
+SOLVER:
+  STEPS: (800,)
+  MAX_ITER: 1000  # 17.4 epochs
+  WARMUP_ITERS: 0
+  IMS_PER_BATCH: 8
+  CHECKPOINT_PERIOD: 500
+  BASE_LR: 0.001
+TEST:
+  EVAL_PERIOD: 1000
+  AUG:
+    ENABLED: False

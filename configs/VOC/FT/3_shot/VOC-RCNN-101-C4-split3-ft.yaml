@@ -1,0 +1,63 @@
+_BASE_: "../../../Base-RCNN-C4.yaml"
+MODEL:
+  WEIGHTS: "/scratch/hdd001/home/skhandel/FewshotDetection/WSASOD/models/1198019/best_model_final_weights.pth"
+  META_ARCHITECTURE: "WeaklySupervisedRCNNNoMeta"
+  MASK_ON: False
+  FREEZE_LAYERS:
+    ROI_HEADS: ['box_pooler', 'box_head', 'weak_box_head']
+    META_ARCH: ['backbone', 'proposal_generator']
+    FAST_RCNN: ['weak_detector_head', 'cls_score_delta', 'bbox_pred_delta', 'embeddings']
+  BACKBONE: 
+    FREEZE_AT: 2
+    NAME: 'build_resnet_backbone'
+  RESNETS:
+    DEPTH: 101
+  ROI_HEADS:
+    NAME: "WSROIHeadFineTune"
+    MULTI_BOX_HEAD: True
+    NUM_CLASSES: 20
+    EMBEDDING_PATH: "/h/skhandel/FewshotDetection/WSASOD/data/embeddings/glove_mean"
+    FAST_RCNN:
+      NAME: "SupervisedDetectorOutputsFineTune"
+      WEAK_DETECTOR:
+        DETECTOR_TEMP: 2.0
+        REGRESSION_BRANCH: False
+    FINETUNE_TERMS:
+      CLASSIFIER: ['lingual', 'visual']
+      BBOX: ['lingual', 'visual']
+      MASK: ['lingual', 'visual']
+    VISUAL_ATTENTION_HEAD:
+      VISUAL_SIMILARITY_THRESHOLD: 0.02
+  ROI_BOX_HEAD:
+    NAME: 'Res5BoxHead'
+    POOLER_RESOLUTION: 14 
+    POOLER_TYPE: "ROIAlignV2"
+  PROPOSAL_GENERATOR:
+    NAME: "WSRPN"
+INPUT:
+  MIN_SIZE_TRAIN: (480, 512, 544, 576, 608, 640, 672, 704, 736, 768, 800)
+  MIN_SIZE_TEST: 800
+DATASETS:
+  TRAIN: ('voc_fine_tuning_query_train',)
+  TEST: ('voc_fine_tuning_query_val', )
+  CLASSIFIER_TRAIN: ('pascal_trainval_2007', 'pascal_trainval_2012',)
+  FEWSHOT:
+    TYPE: 'VOC'
+    NUM_SHOTS: 3
+    SPLIT_ID: 3
+    BASE_CLASSES_ID: [0, 1, 2, 4, 5, 6, 8, 9, 10, 11, 12, 14, 15, 18, 19]
+    NOVEL_CLASSES_ID: [3, 7, 13, 16, 17]
+DATALOADER:
+  NUM_WORKERS: 2
+SOLVER:
+  STEPS: (150,)
+  MAX_ITER: 150   # 17.4 epochs
+  WARMUP_ITERS: 0
+  IMS_PER_BATCH: 8
+  CHECKPOINT_PERIOD: 50
+  REFINEMENT_LR_FACTOR: 1.0
+  BASE_LR: 0.001
+TEST:
+  EVAL_PERIOD: 150
+  AUG:
+    ENABLED: False

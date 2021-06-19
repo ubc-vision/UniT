@@ -1,0 +1,17 @@
+# Adapted from: https://github.com/bingykang/Fewshot_Detection/blob/master/cfg/metayolo.data
+# paths roots are changed
+
+metayolo: 1
+metain_type: 2
+data: coco
+neg: 1
+rand: 0
+novel: /h/skhandel/FewshotDetection/WSASOD/data/data_utils/data/coco_novels.txt
+novelid: 3
+#     scale: 0  # commented out originally
+meta: /h/skhandel/FewshotDetection/WSASOD/data/data_utils/data/coco_traindict_full.txt
+train: /h/skhandel/FewshotDetection/WSASOD/data/data_utils/data/MSCOCO/trainvalno5k.txt
+valid: /h/skhandel/FewshotDetection/WSASOD/data/data_utils/data/MSCOCO/5k.txt
+backup: tmp/metayolo
+gpus: 0
+num_workers: 2

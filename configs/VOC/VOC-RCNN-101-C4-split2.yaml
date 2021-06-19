@@ -1,0 +1,53 @@
+_BASE_: "../Base-RCNN-C4.yaml"
+MODEL:
+  WEIGHTS: "../models/resnet_101_MSRA_C4.pth"
+  META_ARCHITECTURE: "WeaklySupervisedRCNNNoMeta"
+  MASK_ON: False
+  BACKBONE: 
+    FREEZE_AT: 2
+    NAME: 'build_resnet_backbone'
+  RESNETS:
+    DEPTH: 101
+  ROI_HEADS:
+    NAME: "WSROIHeadNoMeta"
+    MULTI_BOX_HEAD: True
+    NUM_CLASSES: 20
+    EMBEDDING_PATH: "/h/skhandel/FewshotDetection/WSASOD/data/embeddings/glove_mean"
+    FAST_RCNN:
+      NAME: "SupervisedDetectorOutputsBase"
+      WEAK_DETECTOR:
+        DETECTOR_TEMP: 2.0
+        REGRESSION_BRANCH: False
+  ROI_BOX_HEAD:
+    NAME: 'Res5BoxHead'
+    POOLER_RESOLUTION: 14 
+    POOLER_TYPE: "ROIAlignV2"
+  PROPOSAL_GENERATOR:
+    NAME: "WSRPN"
+INPUT:
+  MIN_SIZE_TRAIN: (480, 512, 544, 576, 608, 640, 672, 704, 736, 768, 800)
+  MIN_SIZE_TEST: 800
+DATASETS:
+  TRAIN: ('voc_base_training_query_train',)
+  TEST: ('voc_base_training_query_val', )
+  CLASSIFIER_TRAIN: ('pascal_trainval_2007', 'pascal_trainval_2012',)
+  FEWSHOT:
+    TYPE: 'VOC'
+    NUM_SHOTS: 5
+    SPLIT_ID: 2
+    BASE_CLASSES_ID: [1, 2, 3, 5, 6, 7, 8, 10, 11, 13, 14, 15, 16, 18, 19]
+    NOVEL_CLASSES_ID: [0, 4, 9, 12, 17]
+DATALOADER:
+  NUM_WORKERS: 2
+SOLVER:
+  STEPS: (12000, 24000)
+  MAX_ITER: 30000  # 17.4 epochs
+  IMS_PER_BATCH: 8
+  CHECKPOINT_PERIOD: 500
+  BASE_LR: 0.02
+  REFINEMENT_LR_FACTOR: 1.0
+  WARMUP_ITERS: 100
+TEST:
+  EVAL_PERIOD: 2000
+  AUG:
+    ENABLED: False
