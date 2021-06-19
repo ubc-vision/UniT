@@ -208,7 +208,7 @@ def update_paths(args):
 
 if __name__ == '__main__':
     args = parser.parse_args()
-    # download_data(args)
-    # setup_data(args)
+    download_data(args)
+    setup_data(args)
     generate_fewshot(args)
     update_paths(args)
