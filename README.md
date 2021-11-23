@@ -38,7 +38,7 @@ python scripts/train_VOC.py --config-file "configs/VOC/VOC-RCNN-101-C4-split{num
 ### Fine Tuning
 - Fine Tuning on VOC
 ```python
-python scripts/finetune_VOC.py --config-file "configs/VOC/VOC-RCNN-101-C4-split{num}.yaml" --num-gpus 4 --resume OUTPUT_DIR "Path/for/Checkpointing" MODEL.WEIGHTS "Path/to/Base/Training/Model/Weights"
+python scripts/finetune_VOC.py --config-file "configs/VOC/FT/{num}_shot/VOC-RCNN-101-C4-split{num}-ft.yaml" --num-gpus 4 --resume OUTPUT_DIR "Path/for/Checkpointing" MODEL.WEIGHTS "Path/to/Base/Training/Model/Weights" 
 ```
 
 ### Evaluation
