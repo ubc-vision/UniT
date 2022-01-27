@@ -12,8 +12,9 @@ from detectron2.structures import BoxMode
 from detectron2.data import DatasetCatalog, MetadataCatalog
 
 from ...pipelines_adaptor.voc.fine_tuning import FineTuneFSODAdaptor
+import yaml
 
-PATH_CONFIG = '/h/skhandel/FewshotDetection/WSASOD/data/pipelines_adaptor/voc/config_fine_tuning.yaml'
+PATH_CONFIG = '../../pipelines_adaptor/voc/config_fine_tuning.yaml'
 # assert(os.path.isfile(PATH_CONFIG))
 
 class FineTuneData:
@@ -23,10 +24,11 @@ class FineTuneData:
     def __init__(self, novel_id=0, num_shots=5):
         self.novel_id = novel_id
         self.num_shots = num_shots
-
+        with open(os.path.abspath(__file__ + "/../" + PATH_CONFIG), 'r') as f:
+            self.data_options = yaml.safe_load(f)
         self.fine_tune_adaptor_instance = FineTuneFSODAdaptor(
             novel_id=self.novel_id, num_shots=self.num_shots,
-            path_config=PATH_CONFIG
+            path_config=os.path.abspath(__file__ + "/../" + PATH_CONFIG)
         )
         self.fine_tune_adaptor_instance = copy.deepcopy(self.fine_tune_adaptor_instance)
 
@@ -70,7 +72,7 @@ class FineTuneData:
         MetadataCatalog.get("voc_fine_tuning_query_val").set(
             thing_classes=self.fine_tune_adaptor_instance.cfg.voc_classes,
             evaluator_type='pascal_voc',
-            dirname='/h/skhandel/FewshotDetection/WSASOD/data/data_utils/data/VOCdevkit/VOC2007',
+            dirname=self.data_options['data_root']+'/VOCdevkit/VOC2007',
             year=2007,
             split='test')
 

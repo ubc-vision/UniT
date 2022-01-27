@@ -189,8 +189,9 @@ def generate_fewshot(args):
     os.system('rm -rf {}/Fewshot_Detection'.format(wd))
 
 def update_paths(args):
-    main_dir = os.path.dirname(getcwd())
+    main_dir = getcwd()
     data_dir = os.path.abspath(args.DATA_ROOT)
+    
     base_yaml_path = os.path.join(main_dir, 'data', 'pipelines_adaptor', 'voc', 'config_base_training.yaml')
     ft_yaml_path = os.path.join(main_dir, 'data', 'pipelines_adaptor', 'voc', 'config_fine_tuning.yaml')
     with open(base_yaml_path, 'r') as f:

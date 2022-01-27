@@ -12,7 +12,7 @@ MODEL:
     NAME: "WSROIHeadNoMeta"
     MULTI_BOX_HEAD: True
     NUM_CLASSES: 20
-    EMBEDDING_PATH: "/h/skhandel/FewshotDetection/WSASOD/data/embeddings/glove_mean"
+    EMBEDDING_PATH: "../data/embeddings/glove_mean"
     FAST_RCNN:
       NAME: "SupervisedDetectorOutputsBase"
       WEAK_DETECTOR:
